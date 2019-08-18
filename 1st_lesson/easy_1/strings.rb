@@ -53,8 +53,7 @@ def stringy(size)
   numbers.join
 end
 
-=end
-
+# My Solution
 
 def stringy(integer) 
 
@@ -71,10 +70,22 @@ def stringy(integer)
 
 end
 
-puts stringy(6) == '101010'
-puts stringy(9) == '101010101'
-puts stringy(4) == '1010'
-puts stringy(7) == '1010101'
+=end
+
+def stringy(size, first_char=1)
+  # base case: 
+  return "" if size <= 0
+
+  # recursive step:
+  first_char == 0 ? "0" + stringy(size - 1, 1) : "1" + stringy(size - 1, 0)
+  
+end
+
+
+puts stringy(4,0)
+puts stringy(7,1)
+
+
 
 
 

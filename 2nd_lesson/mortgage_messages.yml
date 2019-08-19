@@ -1,0 +1,6 @@
+
+welcome: "Let's go!"
+loan_am: "Specify the loan amount:"
+apr: "Enter the Annual Percent Rate (for example: 5, 15):"
+duration_years: "Add loan duration period in years (for example: 10,15,30):"
+error: "Something doesn't seem right..."

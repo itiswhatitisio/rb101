@@ -1,0 +1,22 @@
+
+  
+en:
+  welcome: "Welcome to the Calculator! Enter your name:"
+  valid_name: "Make sure to use a valid name."
+  first_num: "What's the first number?"
+  valid_num: "That doesn't look like a valid number"
+  second_num: "What's the second number?"
+  valid_operator: "Must choose 1, 2, 3 or 4"
+  another_cal: "Do you want to perform another calculation? (Y to calculate again)"
+  final_message: "Thank you for using the calculator!"
+
+de:
+  welcome: "Willkommen! Wie hießt du?:"
+  valid_name: "Bitte einen gültigen Namen eingeben."
+  first_num: "Gib die erste Nummer ein:"
+  valid_num: "Bitte eine gültige Nummer eingeben."
+  second_num: "Gib die zweite Nummer ein:"
+  valid_operator: "Gib 1, 2, 3 oder 4 ein"
+  another_cal: "Noch eine Berechnung? (Y um noch einmal zu rechnen)"
+  final_message: "Auf Wiedersehen!"
+

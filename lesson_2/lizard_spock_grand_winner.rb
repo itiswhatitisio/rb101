@@ -23,6 +23,15 @@ def validate_username(name)
  end
 end
 
+def validate_play_again(input)
+  input = input.downcase()
+  if input == 'y' || input == 'n'
+    return true
+   else 
+     return false
+   end
+end
+
 def convert_input(input)
   case input
   when 'r', 'R'
@@ -151,8 +160,13 @@ loop do
     break
   end
 
-  prompt("Do you want to play again? (y for yes/n for no)")
+prompt("Do you want to play again? (y for yes/n for no)")
+answer = Kernel.gets().chomp()
+
+loop do 
+  break if validate_play_again(answer)
+  prompt('This is not a valid choice. Please enter y for yes/n for no')
   answer = Kernel.gets().chomp()
-  break unless answer.downcase().start_with?('y')
+end
   clear_screen()
 end

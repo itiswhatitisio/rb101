@@ -25,15 +25,15 @@ end
 
 def convert_input(input)
   case input
-  when 'r'
+  when 'r', 'R'
     'rock'
-  when 'l'
+  when 'l', 'L'
     'lizard'
-  when 'k'
+  when 'k', 'K'
     'spock'
-  when 's'
+  when 's', 'S'
     'scissors'
-  when 'p'
+  when 'p', 'P'
     'paper'
   end
 end
@@ -117,7 +117,7 @@ loop do
       choice = ''
       loop do # validate choice
         prompt("Choose one: #{DISPLAY_CHOICES.join(', ')}")
-        choice = Kernel.gets().chomp()
+        choice = Kernel.gets().chomp().downcase()
 
         if VALID_CHOICES.include?(choice)
           break

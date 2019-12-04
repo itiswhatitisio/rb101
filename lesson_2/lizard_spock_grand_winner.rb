@@ -136,25 +136,18 @@ loop do
       end
 
       computer_choice = VALID_CHOICES.sample()
-
       computer_choice = convert_input(computer_choice)
-
       choice = convert_input(choice)
-
       Kernel.puts("You chose: #{choice}; Computer chose: #{computer_choice}")
 
       game_outcome = win?(choice, computer_choice)
-
       display_results_single_game(choice, computer_choice, game_outcome)
-
       increment_scores(user_name, computer, game_outcome, scores)
-
       display_current_score(scores)
 
     end
 
     grand_winner = determine_grand_winner(scores)
-
     display_grand_winner(grand_winner)
 
     break

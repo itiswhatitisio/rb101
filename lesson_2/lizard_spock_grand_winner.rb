@@ -15,6 +15,14 @@ WINNING_COMBINATIONS = {
 
 NUMBER_GAMES = 5
 
+def validate_username(name)
+ if name == '' || name.strip.empty? || name.nil?
+   return false
+ else
+   return true
+ end
+end
+
 def convert_input(input)
   case input
   when 'r'
@@ -84,8 +92,16 @@ end
 
 # Main program
 
-prompt("What is your name?")
+clear_screen()
+
+prompt('What is your name?')
 user_name = Kernel.gets().chomp()
+
+loop do 
+  break if validate_username(user_name)
+  prompt('This is not a valid name. Please enter a valid name')
+  user_name = Kernel.gets().chomp()
+end
 
 prompt("Welcome to the game, #{user_name}!
   To become a grand winner, win five games.")

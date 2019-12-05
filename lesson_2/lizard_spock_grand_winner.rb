@@ -47,20 +47,31 @@ def convert_input(input)
   end
 end
 
-def win?(first, second)
-  WINNING_COMBINATIONS.each do |key, arr|
-    if key.to_s == first
-      return (second == arr[0] || second == arr[1])
+def win?(user_choice, computer_choice)
+  if user_choice == computer_choice
+  puts 'tie'
+    return 'tie'
+  else
+    WINNING_COMBINATIONS.each do |key, arr|
+      if key.to_s == user_choice
+        if (computer_choice == arr[0] || computer_choice == arr[1])
+        puts 'winner'
+          return 'winner'
+          end
+      else
+        puts 'loser'
+        return 'loser'
+      end
     end
   end
 end
 
-def display_results_single_game(player_choice, choice_computer, result)
-  if player_choice == choice_computer
+def display_results_single_game(result)
+  if result == 'tie'
     puts "It's a tie!"
-  elsif result
+  elsif result == 'winner'
     puts "You won!"
-  else
+  elsif result == 'loser'
     puts "You lost!"
   end
 end
@@ -141,7 +152,7 @@ loop do
       Kernel.puts("You chose: #{choice}; Computer chose: #{computer_choice}")
 
       game_outcome = win?(choice, computer_choice)
-      display_results_single_game(choice, computer_choice, game_outcome)
+      display_results_single_game(game_outcome)
       increment_scores(user_name, computer, game_outcome, scores)
       display_current_score(scores)
 

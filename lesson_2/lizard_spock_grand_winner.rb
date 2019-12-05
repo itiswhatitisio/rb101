@@ -32,6 +32,15 @@ def validate_play_again(input)
    end
 end
 
+def continue_playing(answer)
+  loop do 
+    puts validate_play_again(answer)
+    break if validate_play_again(answer)
+    prompt('This is not a valid choice. Please enter y for yes/n for no')
+    answer = Kernel.gets().chomp()
+  end
+end
+
 def convert_input(input)
   case input
   when 'r', 'R'
@@ -166,11 +175,8 @@ loop do
 
 prompt("Do you want to play again? (y for yes/n for no)")
 answer = Kernel.gets().chomp()
-
-loop do 
-  break if validate_play_again(answer)
-  prompt('This is not a valid choice. Please enter y for yes/n for no')
-  answer = Kernel.gets().chomp()
-end
+continue_playing(answer)
+break if answer == 'n'
+  
   clear_screen()
 end

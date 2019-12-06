@@ -126,14 +126,9 @@ clear_screen()
 prompt('What is your name?')
 user_name = Kernel.gets().chomp()
 
-loop do 
-  break if validate_username(user_name)
-  prompt('This is not a valid name. Please enter a valid name')
-  user_name = Kernel.gets().chomp()
-end
+invalid_username(user_name)
 
-prompt("Welcome to the game, #{user_name}!
-  To become a grand winner, win five games.")
+prompt("Welcome to the game, #{user_name}! To become a grand winner, win five games.")
 
 computer = 'Computer'
 

@@ -176,7 +176,7 @@ loop do
 prompt("Do you want to play again? (y for yes/n for no)")
 answer = Kernel.gets().chomp()
 continue_playing(answer)
-break if answer == 'n'
+break if answer.downcase() == 'n'
   
   clear_screen()
 end

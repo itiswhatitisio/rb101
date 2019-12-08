@@ -15,29 +15,41 @@ WINNING_COMBINATIONS = {
 
 NUMBER_GAMES = 5
 
+def welcome(user_name)
+  prompt("Welcome to the game, #{user_name}!
+    To become a grand winner, win five games.")
+end
+
 def validate_username(name)
- if name == '' || name.strip.empty? || name.nil?
-   return false
- else
-   return true
- end
+  if name == '' || name.strip.empty? || name.nil?
+    false
+  else
+    true
+  end
 end
 
-def validate_play_again(input)
-  input = input.downcase()
-  if input == 'y' || input == 'n'
-    return true
-   else 
-     return false
-   end
+def determine_username
+  prompt('What is your name?')
+  user_name = Kernel.gets().chomp()
+  loop do
+    if validate_username(user_name)
+      return user_name
+    end
+    prompt("This is not a valid name. Please enter a valid name")
+    user_name = Kernel.gets().chomp()
+  end
 end
 
-def continue_playing(answer)
-  loop do 
-    puts validate_play_again(answer)
-    break if validate_play_again(answer)
-    prompt('This is not a valid choice. Please enter y for yes/n for no')
-    answer = Kernel.gets().chomp()
+def determine_user_choice
+  loop do
+    prompt("Choose one: #{DISPLAY_CHOICES.join(', ')}")
+    choice = Kernel.gets().chomp().downcase()
+    if VALID_CHOICES.include?(choice)
+      choice = convert_input(choice)
+      return choice
+    else
+      prompt("That's not a valid choice")
+    end
   end
 end
 
@@ -56,39 +68,40 @@ def convert_input(input)
   end
 end
 
-def win?(user_choice, computer_choice)
+def determine_computer_choice
+  convert_input(VALID_CHOICES.sample())
+end
+
+def win(user_choice, computer_choice)
   if user_choice == computer_choice
-  puts 'tie'
-    return 'tie'
+    'tie'
   else
     WINNING_COMBINATIONS.each do |key, arr|
       if key.to_s == user_choice
-        if (computer_choice == arr[0] || computer_choice == arr[1])
-        puts 'winner'
+        if arr.include?(computer_choice)
           return 'winner'
-          end
-      else
-        puts 'loser'
-        return 'loser'
+        else
+          return 'loser'
+        end
       end
     end
   end
 end
 
-def display_results_single_game(result)
-  if result == 'tie'
-    puts "It's a tie!"
-  elsif result == 'winner'
+def display_results_single_game(outcome)
+  if outcome == 'winner'
     puts "You won!"
-  elsif result == 'loser'
+  elsif outcome == 'loser'
     puts "You lost!"
+  elsif outcome == 'tie'
+    puts "It's a tie!"
   end
 end
 
 def increment_scores(player_name, computer, win_result, score_hash = {})
-  if win_result
+  if win_result == 'winner'
     score_hash[player_name] += 1
-  else
+  elsif win_result == 'loser'
     score_hash[computer] += 1
   end
 end
@@ -111,6 +124,26 @@ def display_grand_winner(winner)
   winner.each_key { |key| puts "The grand winner is #{key}!" }
 end
 
+def validate_play_again(input)
+  input = input.downcase()
+  if input == 'y' || input == 'n'
+    return true
+  else
+    return false
+  end
+end
+
+def continue_playing
+  prompt("Do you want to play again? (y for yes/n for no)")
+  answer = Kernel.gets().chomp()
+  loop do
+    break if validate_play_again(answer)
+    prompt('This is not a valid choice. Please enter y for yes/n for no')
+    answer = Kernel.gets().chomp()
+  end
+  answer.downcase == 'y'
+end
+
 def clear_screen
   system('clear') || system('cls')
 end
@@ -123,55 +156,28 @@ end
 
 clear_screen()
 
-prompt('What is your name?')
-user_name = Kernel.gets().chomp()
-
-invalid_username(user_name)
-
-prompt("Welcome to the game, #{user_name}! To become a grand winner, win five games.")
-
+player_name = determine_username()
+welcome(player_name)
 computer = 'Computer'
 
 loop do
-  loop do # count scores
-    scores = Hash.new { 0 }
+  scores = Hash.new { 0 }
 
-    until max_num_games_reached?(scores)
-
-      choice = ''
-      loop do # validate choice
-        prompt("Choose one: #{DISPLAY_CHOICES.join(', ')}")
-        choice = Kernel.gets().chomp().downcase()
-
-        if VALID_CHOICES.include?(choice)
-          break
-        else
-          prompt("That's not a valid choice")
-        end
-      end
-
-      computer_choice = VALID_CHOICES.sample()
-      computer_choice = convert_input(computer_choice)
-      choice = convert_input(choice)
-      Kernel.puts("You chose: #{choice}; Computer chose: #{computer_choice}")
-
-      game_outcome = win?(choice, computer_choice)
-      display_results_single_game(game_outcome)
-      increment_scores(user_name, computer, game_outcome, scores)
-      display_current_score(scores)
-
-    end
-
-    grand_winner = determine_grand_winner(scores)
-    display_grand_winner(grand_winner)
-
-    break
+  loop do
+    choice = determine_user_choice()
+    computer_choice = determine_computer_choice()
+    Kernel.puts("You chose: #{choice}; Computer chose: #{computer_choice}")
+    game_outcome = win(choice, computer_choice)
+    display_results_single_game(game_outcome)
+    increment_scores(player_name, computer, game_outcome, scores)
+    display_current_score(scores)
+    break if max_num_games_reached?(scores)
   end
 
-prompt("Do you want to play again? (y for yes/n for no)")
-answer = Kernel.gets().chomp()
-continue_playing(answer)
-break if answer.downcase() == 'n'
-  
+  grand_winner = determine_grand_winner(scores)
+  display_grand_winner(grand_winner)
+
+  break unless continue_playing()
+
   clear_screen()
 end

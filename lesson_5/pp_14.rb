@@ -9,16 +9,16 @@ Input: hash
 Output: array
 
 # Requirements
-- sizes should be uppercase 
-- the colors should be capitalized.
+- sizes -> vegetables: should be uppercase 
+- the colors -> fruit: should be capitalized.
 
 # Examples:
 [["Red", "Green"], "MEDIUM", ["Red", "Green"], ["Orange"], "LARGE"]
 
 # Data structure/Algorithm
 - iterate over hash
-- select colors
-- select size
+- if type == vegetable, then select size, return the value
+- if type == fruit, then select colors, return value
 
 =end
 
@@ -30,10 +30,17 @@ hsh = {
   'marrow' => {type: 'vegetable', colors: ['green'], size: 'large'},
 }
 
+# p hsh['grape'][:colors]
+
 result = hsh.map do |key, val| 
-  val.select do |el|
-    p el.to_s == "colors"
+  if val[:type] == 'vegetable'
+    val[:size].upcase
+  elsif val[:type] == 'fruit'
+    val[:colors].map do |fruit|
+      fruit.capitalize
+    end
   end
-      
 end
+
+p result
 

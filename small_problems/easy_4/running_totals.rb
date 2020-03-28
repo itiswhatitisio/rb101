@@ -44,13 +44,11 @@ def running_total_map(array)
   array.map {|val| sum += val }
 end
 
-def running_total_reduce(array) 
-  output = []
-    array.reduce do |sum, val| 
-      result = sum + val
-      p result
-    end
+def running_total_reduce(array)
+    total = 0
+    array.inject([]) { |memo, current_num| p memo << total += current_num }
 end
+
 
 running_total([2, 5, 13]) == [2, 7, 20]
 running_total([14, 11, 7, 15, 20]) == [14, 25, 32, 47, 67]
@@ -62,7 +60,7 @@ running_total_map([14, 11, 7, 15, 20]) == [14, 25, 32, 47, 67]
 running_total_map([3]) == [3]
 running_total_map([]) == []
 
-p running_total_reduce([2, 5, 13])
-#p running_total_reduce([14, 11, 7, 15, 20]) == [14, 25, 32, 47, 67]
-#p running_total_reduce([3]) == [3]
-#p running_total_reduce([]) == []
+p running_total_reduce([2, 5, 13]) == [2, 7, 20]
+p running_total_reduce([14, 11, 7, 15, 20]) == [14, 25, 32, 47, 67]
+p running_total_reduce([3]) == [3]
+p running_total_reduce([]) == []

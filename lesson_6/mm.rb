@@ -180,7 +180,7 @@ def detect_winner(brd)
   nil
 end
 
-def count_score(score, board)
+def update_score(score, board)
   if detect_winner(board) == 'Player'
     score['Player'] += 1
   elsif detect_winner(board) == 'Computer'
@@ -252,7 +252,7 @@ loop do
     end
 
     display_board(board)
-    count_score(score, board)
+    update_score(score, board)
     display_score(score)
     display_round_winner(board)
     break if determine_grand_winner(score)

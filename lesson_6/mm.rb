@@ -1,35 +1,3 @@
-=begin
-
-Minimax Algorithm:
-
-Requirements:
-- minimax algorithm determines the best possible move for computer
-- this is done by assigning a certain value to each board state
-- algorithm looks ahead and evaluates each move by placing
-  marker on empty spots
-- each move is then evaluated and score is assigned
-- Computer is a maximizing player, and Player is minimizing player
-- if computer wins, the board state assigned value 1
-- if player wins, the board state has value -1
-- if it is a tie, the board state has a value of 0
-
-Algorithm:
-
-- Evaluate current state of the board
-  - Base case: if board is full or someone won, recursion should stop
-- Initialize the best_move variable
-- Initialize the best_score variables for computer and player
-- For each empty square:
-  - Create a duplicate board
-  - Assign a player marker to an empty square
-  - Evaluate the current state of the board
-  - If the game is over or board full, assigne a value for the current move
-  - Else call the minimax again -> recursion
-  - If Computer wins, update the best score for the current move
-  - If Player wins, update the best score for the current move
-- Return best score and best move
-
-=end
 
 require 'colorize'
 
@@ -137,11 +105,11 @@ def minimax(brd, player)
       score_current_move = minimax(new_board, alternate_player(player))[0]
     end
     # maximizing player
-    if player == 'Computer' && score_current_move > best_score
+    if player == 'Computer' && score_current_move >= best_score
       best_score = score_current_move
       best_move = empty_square
     # minimizing player
-    elsif player == 'Player' && score_current_move < best_score
+    elsif player == 'Player' && score_current_move <= best_score
       best_score = score_current_move
       best_move = empty_square
     end
@@ -294,6 +262,7 @@ loop do
     break if answer_play_round.downcase.start_with?('n')
     prompt 'Next round will start in 2 seconds!'
     sleep(2)
+
   end
 
   break if answer_play_round.downcase.start_with?('n')

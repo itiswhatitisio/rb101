@@ -1,0 +1,28 @@
+Minimax Algorithm:
+
+Requirements:
+- minimax algorithm determines the best possible move for computer
+- this is done by assigning a certain value to each board state
+- algorithm looks ahead and evaluates each move by placing
+  marker on empty spots
+- each move is then evaluated and score is assigned
+- Computer is a maximizing player, and Player is minimizing player
+- if computer wins, the board state assigned value 1
+- if player wins, the board state has value -1
+- if it is a tie, the board state has a value of 0
+
+Algorithm:
+
+- Evaluate current state of the board
+  - Base case: if board is full or someone won, recursion should stop
+- Initialize the best_move variable
+- Initialize the best_score variables for computer and player
+- For each empty square:
+  - Create a duplicate board
+  - Assign a player marker to an empty square
+  - Evaluate the current state of the board
+  - If the game is over or board full, assigne a value for the current move
+  - Else call the minimax again -> recursion
+  - If Computer wins, update the best score for the current move
+  - If Player wins, update the best score for the current move
+- Return best score and best move

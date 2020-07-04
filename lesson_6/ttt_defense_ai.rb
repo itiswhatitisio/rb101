@@ -1,5 +1,7 @@
 =begin
 
+This is implementation based on the LS solution
+
 # Requirements
 - computer - defensive minded
 - if there is an immediate threat, defend the 3rd square

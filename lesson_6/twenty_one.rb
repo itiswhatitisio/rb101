@@ -63,8 +63,7 @@ def display_cards(cards, player = :Player)
   prompt "#{player}: #{cards[player]}"
 end
 
-def calculate_score(player_cards)
-  score = { Dealer: 0, Player: 0 }
+def calculate_score(player_cards, score)
   player_cards.each do |player, hand|
     hand.each do |card|
       if SCORE.include?(card[:value])
@@ -108,9 +107,15 @@ def display_winner(winner)
 end
 
 def play_again?
-  prompt 'Play again? (y or n)'
-  answer = gets.chomp
-  answer.downcase.start_with?('y')
+  answer = nil
+  loop do
+    prompt 'Play again? (y or n)'
+    answer = gets.chomp
+    break if answer == 'y' || answer == 'n'
+    prompt "This is not a valid choice. Please select 'y' or 'n'"
+  end
+  puts answer
+   answer.downcase.start_with?('y')
 end
 
 ## MAIN PROGRAM ##
@@ -134,7 +139,7 @@ loop do
   # Deal two cards to player and dealer
   player_cards_current_game = deal_initial_cards(current_cards, deck_current_game)
   display_initial_cards(current_cards)
-  prompt "Your score is #{calculate_score(current_cards)[:Player]}"
+  prompt "Your score is #{calculate_score(current_cards,current_score)[:Player]}"
 
   # Player turn: hit or stay
   loop do
@@ -142,7 +147,7 @@ loop do
     break if answer == 's' # stay
     current_cards[:Player] << deal_card!(deck_current_game)
     display_cards(current_cards)
-    prompt "Your score is #{calculate_score(current_cards)[:Player]}"
+    prompt "Your score is #{calculate_score(current_cards,current_score)[:Player]}"
     break if busted?(calculate_score(current_cards), "Player".to_sym)
   end
 

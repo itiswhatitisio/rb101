@@ -1,32 +1,27 @@
-require 'yaml'
-
-CARDS_VALUES = %w(2 3 4 5 6 7 8 9 10 jack queen king ace)
-SUITS = %w(hearts diamonds clubs spades)
-SCORE = %w(jack queen king)
-ACE_VALUES = { low: 1, high: 11 }
+CARDS_VALUES = %w(2 3 4 5 6 7 8 9 10 jack queen king ace).freeze
+SUITS = %w(hearts diamonds clubs spades).freeze
+VALUES = {  "2" => 2, "3" => 3, "4" => 4, "5" => 5, "6" => 6,
+            "7" => 7, "8" => 8, "9" => 9, "10" => 10, "jack" => 10,
+            "queen" => 10, "king" => 10, "ace" => { low: 1, high: 11 } }.freeze
+ACE_VALUES = { low: 1, high: 11 }.freeze
 DEALER_SCORE = 17
-GRAND_WINNER_WINNING_SCORE = 5
-#MESSAGES = YAML.load_file('messages.yml')
-
-# LANGUAGE = 'en'
-
-# def messages(message, lang='en')
-#   MESSAGES[lang][message]
-# end
-
-# def prompt(key)
-#   message = messages(key, LANGUAGE)   # make sure the "messages" method is declared above this line)
-#   puts "=> #{message}"
-# end
+GRAND_WINNER_THRESHOLD = 5
 
 def prompt(msg)
   puts " => #{msg}"
 end
 
-def initialize_new_deck(suits, cards)
+def welcome
+  prompt "======================================"
+  prompt "Welcome to Twenty One!"
+  prompt "Get 5 points to become a grand winner!"
+  prompt "======================================"
+end
+
+def initialize_new_deck(suits, values)
   new_deck = []
-  suits.product(cards).each do |suit, value|
-      new_deck << { suit: suit, value: value }
+  suits.product(values.keys).each do |suit, value|
+    new_deck << { suit: suit, value: value }
   end
   new_deck
 end
@@ -39,10 +34,10 @@ end
 def hit_or_stay
   answer = nil
   loop do
-    prompt "Hit (h) or stay (s)?"
+    prompt 'Hit (h) or stay (s)?'
     answer = gets.chomp
     break if answer == 'h' || answer == 's'
-    prompt "This is not a valid choice. Press 'h' to hit or 's' to stay." 
+    prompt "This is not a valid choice. Press 'h' to hit or 's' to stay."
   end
   answer
 end
@@ -54,34 +49,49 @@ def deal_initial_cards(cards, current_deck)
   cards
 end
 
-def display_initial_cards(cards)
-  prompt "Dealer: #{cards[:Dealer].sample} and an unknown card"
-  prompt "You: #{cards[:Player]}"
+def display_cards(cards, player, initial = false)
+  result = []
+  cards[player].each do |card|
+    result << "#{card[:value]} of #{card[:suit]}"
+  end
+  if player == :Dealer && initial == true
+    prompt "#{player}: #{result.sample}"
+  else
+    prompt "#{player}: #{result.join(', ')}"
+  end
 end
 
-def display_cards(cards, player = :Player)
-  prompt "#{player}: #{cards[player]}"
+def player_turn
+  loop do
+    answer = hit_or_stay
+    break if answer == 's' # stay
+    current_cards[:Player] << deal_card!(deck_current_game)
+    display_cards(current_cards, :Player)
+    current_score = calculate_score(current_cards, current_score)
+    prompt "Your score is #{current_score[:Player]}"
+    break if busted?(current_score, :Player)
+  end
 end
 
 def calculate_score(player_cards, score)
+  score = { Dealer: 0, Player: 0 }
   player_cards.each do |player, hand|
     hand.each do |card|
-      if SCORE.include?(card[:value])
-        score[player] += 10
-      elsif card[:value] == 'ace'
-        score[player] += ACE_VALUES[:high]
+      if card[:value] == 'ace'
+        score[player] += VALUES["ace"][:high]
       else
-        score[player] += card[:value].to_i
+        score[player] += VALUES[card[:value]]
       end
     end
+    score
   end
 
   player_cards.each do |player, val|
-      val.each do |card|
-        if card[:value] == 'ace' && score[player] > 21
-          score[player] -= 10
-        end
+    val.each do |card|
+      if card[:value] == 'ace' && score[player] > 21
+        score[player] -= 10
       end
+    end
   end
   score
 end
@@ -94,16 +104,68 @@ def busted?(score, player)
   end
 end
 
-def detect_winner(score)
-  return 'tie' if score.values.uniq.length == 1
-  score.key(score.values.max)
+def detect_result(score)
+  player_total = score[:Player]
+  dealer_total = score[:Dealer]
+
+  if player_total > 21
+    :player_busted
+  elsif dealer_total > 21
+    :dealer_busted
+  elsif dealer_total < player_total
+    :Player
+  elsif dealer_total > player_total
+    :Dealer
+  else
+    :tie
+  end
+end
+
+def display_result(score)
+  result = detect_result(score)
+  sleep(3)
+  case result
+  when :player_busted
+    prompt "You busted! Dealer wins!"
+  when :dealer_busted
+    prompt "Dealer busted! You win!"
+  when :Player
+    prompt "You win!"
+  when :Dealer
+    prompt "Dealer wins!"
+  when :tie
+    prompt "It's a tie!"
+  end
+end
+
+def calculate_grand_winner_score(score, result)
+  prompt "Calculating grand winner score..."
+  sleep(2)
+  case result
+  when :player_busted
+    score[:Dealer] += 1
+  when :Dealer
+    score[:Dealer] += 1
+  when :dealer_busted
+    score[:Player] += 1
+  when :Player
+    score[:Player] += 1
+  end
+end
+
+def detect_grand_winner(scores)
+  scores.key(scores.values.max)
 end
 
 def display_winner(winner)
   prompt "========================"
-  return prompt "It's a tie!" + "\n => ========================" if winner == 'tie'
   prompt "The winner is #{winner}"
   prompt "========================"
+end
+
+def continue
+  prompt "Press 'Enter' to continue..."
+  answer = gets.chomp
 end
 
 def play_again?
@@ -114,88 +176,93 @@ def play_again?
     break if answer == 'y' || answer == 'n'
     prompt "This is not a valid choice. Please select 'y' or 'n'"
   end
-  puts answer
-   answer.downcase.start_with?('y')
+  answer.downcase.start_with?('y')
 end
 
 ## MAIN PROGRAM ##
-prompt '======================================'
-prompt "Welcome to Twenty One!"
-prompt "Win 5 rounds to become a grand winner!"
-prompt '======================================'
-
-prompt 'Dealing cards...'
-sleep(4)
-
-grand_winner_score = { Dealer: 0, Player: 0 }
-
-loop do
-  # Initialize deck
-  system 'clear'
-  deck_current_game = initialize_new_deck(SUITS, CARDS_VALUES)
-  current_cards = { Dealer: [], Player: [] }
-  current_score = { Dealer: 0, Player: 0 }
-
-  # Deal two cards to player and dealer
-  player_cards_current_game = deal_initial_cards(current_cards, deck_current_game)
-  display_initial_cards(current_cards)
-  prompt "Your score is #{calculate_score(current_cards,current_score)[:Player]}"
-
-  # Player turn: hit or stay
+welcome
+loop do 
+  prompt 'Dealing cards...' 
+  sleep(4) 
+  
+  grand_winner_score = { Dealer: 0, Player: 0 } 
+  
+  loop do 
+    system 'clear' 
+    deck_current_game = initialize_new_deck(SUITS, VALUES) 
+    current_cards = { Dealer: [], Player: [] } 
+    current_score = { Dealer: 0, Player: 0 } 
+    
+    # Deal two cards to player and dealer 
+    display_cards(current_cards, :Dealer, true)
+    display_cards(current_cards, :Player) 
+    current_score = calculate_score(current_cards, current_score)
+    prompt "Your score is #{current_score[:Player]}"
+    
+    # Player turn: hit or stay
   loop do
     answer = hit_or_stay
     break if answer == 's' # stay
     current_cards[:Player] << deal_card!(deck_current_game)
-    display_cards(current_cards)
-    prompt "Your score is #{calculate_score(current_cards,current_score)[:Player]}"
-    break if busted?(calculate_score(current_cards), "Player".to_sym)
+    display_cards(current_cards, :Player)
+    current_score = calculate_score(current_cards, current_score)
+    prompt "Your score is #{current_score[:Player]}"
+    break if busted?(current_score, :Player)
   end
 
-  if busted?(calculate_score(current_cards), "Player".to_sym)
-    prompt "The score is #{calculate_score(current_cards)}"
-    prompt "You loose!"
-    grand_winner_score[:Dealer] += 1
-    prompt "Total scores: #{grand_winner_score}"
-    break if grand_winner_score.has_value?(5)
-    play_again? ? next : break
+  if busted?(current_score, :Player)
+    display_cards(current_cards, :Dealer, false)
+    prompt "The score for this round is: \n => Dealer: #{current_score[:Dealer]} \n => Player: #{current_score[:Player]}"
+    display_result(current_score)
+    calculate_grand_winner_score(grand_winner_score, detect_result(current_score))
+    prompt "Dealer: #{grand_winner_score[:Dealer]} \n => Player: #{grand_winner_score[:Player]}"
+    break if grand_winner_score.value?(GRAND_WINNER_THRESHOLD)
+    next if continue
   else
-    prompt "You choose to stay!"
+    prompt 'You choose to stay!'
   end
   # Dealer turn
   dealer_answer = nil
   loop do
-    dealer_score = calculate_score(current_cards)[:Dealer]
-    
-    if dealer_score >= DEALER_SCORE
-      dealer_answer = 'stay'
-    else
-      dealer_answer = 'hit'
+    dealer_answer = if current_score[:Dealer] >= DEALER_SCORE
+                      'stay'
+                    else
+                      'hit'
     end
-    break if dealer_answer == 'stay' || busted?(calculate_score(current_cards), "Dealer".to_sym)
-    prompt "Dealer chooses to hit"
+    break if busted?(current_score, :Dealer) || dealer_answer == 'stay'
+
+    prompt 'Dealer chooses to hit'
     current_cards[:Dealer] << deal_card!(deck_current_game)
-    prompt "172 Dealer: #{current_cards[:Dealer]}"
-    prompt "Dealer's score is #{calculate_score(current_cards)[:Dealer]}"
-    break if busted?(calculate_score(current_cards), "Dealer".to_sym)
+    sleep(3)
+    current_score = calculate_score(current_cards, current_score)
+    display_cards(current_cards, :Dealer, false)
+    prompt "Dealer's score is #{current_score[:Dealer]}"
+    break if busted?(current_score, :Dealer)
   end
 
-  if busted?(calculate_score(current_cards), "Dealer".to_sym)
-    prompt "You win! Dealer lost!"
-    grand_winner_score[:Player] += 1
-    prompt "The score is #{calculate_score(current_cards)}"
-    prompt "#{grand_winner_score}"
-    break if grand_winner_score.has_value?(5)
-    play_again? ? next : break
+  if busted?(current_score, :Dealer)
+    display_result(current_score)
+    calculate_grand_winner_score(grand_winner_score, detect_result(current_score))
+    prompt "The score for this round is: \n => Dealer: #{current_score[:Dealer]} \n => Player: #{current_score[:Player]}"
+    prompt "Dealer: #{grand_winner_score[:Dealer]} \n => Player: #{grand_winner_score[:Player]}"
+    break if grand_winner_score.has_value?(GRAND_WINNER_THRESHOLD
+    )
+    next if continue
   else
     prompt "Dealer chooses to stay"
-    prompt "Dealer: #{current_cards[:Dealer]}"
-    prompt "Dealer's score is #{calculate_score(current_cards)[:Dealer]}"
-    display_winner(detect_winner(calculate_score(current_cards)))
-    grand_winner_score[detect_winner(calculate_score(current_cards))] += 1 if detect_winner(calculate_score(current_cards)) != 'tie'
+    display_cards(current_cards, :Dealer, false)
+    current_score = calculate_score(current_cards, current_score)
+    prompt "The score for this round is: \n => Dealer: #{current_score[:Dealer]} \n => Player: #{current_score[:Player]}"
+    display_result(current_score)
+    calculate_grand_winner_score(grand_winner_score, detect_result(current_score))
+    prompt "Dealer: #{grand_winner_score[:Dealer]} \n => Player: #{grand_winner_score[:Player]}"
+    break if grand_winner_score.has_value?(GRAND_WINNER_THRESHOLD)
+    next if continue
   end
-prompt "Total scores: #{grand_winner_score}"
-break if grand_winner_score.has_value?(5)
+  prompt "Total scores: #{grand_winner_score}"
+  break if grand_winner_score.has_value?(GRAND_WINNER_THRESHOLD)
+end
+display_winner(detect_grand_winner(grand_winner_score))
 break unless play_again?
 end
-prompt "The game is over. Thank you for playing!"
-
+prompt 'The game is over. Thank you for playing!'

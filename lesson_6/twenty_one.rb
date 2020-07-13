@@ -7,6 +7,7 @@ VALUES = {  "2" => 2, "3" => 3, "4" => 4, "5" => 5, "6" => 6,
 ACE_VALUES = { low: 1, high: 11 }.freeze
 DEALER_SCORE = 17
 GRAND_WINNER_THRESHOLD = 5
+VALID_ANSWERS = %W(H h S s Y y N n)
 
 def prompt(msg)
   puts " => #{msg}"
@@ -15,7 +16,7 @@ end
 def welcome
   prompt "======================================"
   prompt "Welcome to Twenty One, Player!"
-  prompt "Get 5 points to become a grand winner!"
+  prompt "Get #{GRAND_WINNER_THRESHOLD} points to become a grand winner!"
   prompt "======================================"
 end
 
@@ -37,7 +38,7 @@ def hit_or_stay
   loop do
     prompt 'Hit (h) or stay (s)?'
     answer = gets.chomp
-    break if answer == 'h' || answer == 's'
+    break if VALID_ANSWERS.include?(answer)
     prompt "This is not a valid choice. Press 'h' to hit or 's' to stay."
   end
   answer
@@ -64,14 +65,20 @@ end
 
 def player_turn(deck, cards, score)
   loop do
+    break if score[:Player] == 21
     answer = hit_or_stay
-    break if answer == 's' # stay
+    break if stay?(answer)
     cards[:Player] << deal_card!(deck)
     display_cards(cards, :Player)
-    score = calculate_score(cards, score)
-    prompt "Your score is #{score[:Player]}"
+    score = calculate_score(cards)
+    display_score(:Player, score)
+    break if score[:Player] == 21
     break if busted?(score, :Player)
   end
+end
+
+def stay?(answer)
+  answer == 's'
 end
 
 def dealer_turn(deck, cards, score)
@@ -85,14 +92,14 @@ def dealer_turn(deck, cards, score)
     break if busted?(score, :Dealer) || dealer_answer == 'stay'
     prompt 'Dealer chooses to hit'
     cards[:Dealer] << deal_card!(deck)
-    sleep(3)
-    score = calculate_score(cards, score)
+    sleep(2)
+    score = calculate_score(cards)
     display_cards(cards, :Dealer, false)
-    prompt "Dealer's score is #{score[:Dealer]}"
+    display_score(:Dealer, score)
   end
 end
 
-def calculate_score(player_cards, score)
+def calculate_score(player_cards)
   score = { Dealer: 0, Player: 0 }
   player_cards.each do |player, hand|
     hand.each do |card|
@@ -118,11 +125,7 @@ def calculate_ace_value(player_cards, score)
 end
 
 def busted?(score, player)
-  if score[player] > 21
-    true
-  else
-    false
-  end
+  score[player] > 21
 end
 
 def round_over(score, grand_winner_score)
@@ -152,7 +155,7 @@ end
 
 def display_result(score)
   result = detect_result(score)
-  sleep(3)
+  sleep(2)
   case result
   when :player_busted
     prompt "You busted! Dealer wins!"
@@ -167,9 +170,9 @@ def display_result(score)
   end
 end
 
-def calculate_grand_winner_score(score, result)
+def update_grand_winner_score(score, result)
   prompt "Calculating grand winner score..."
-  sleep(2)
+  sleep(1)
   case result
   when :player_busted
     score[:Dealer] += 1
@@ -182,8 +185,12 @@ def calculate_grand_winner_score(score, result)
   end
 end
 
+def display_score(player, score)
+  prompt "Your score is #{score[player]}"
+end
+
 def display_grand_winner_score(grand_winner_score, score)
-  calculate_grand_winner_score(grand_winner_score, detect_result(score))
+  update_grand_winner_score(grand_winner_score, detect_result(score))
   prompt "************************"
   prompt "Dealer: #{grand_winner_score[:Dealer]}"
   prompt "Player: #{grand_winner_score[:Player]}"
@@ -210,7 +217,7 @@ def play_again?
   loop do
     prompt 'Play again? (y or n)'
     answer = gets.chomp
-    break if answer == 'y' || answer == 'n'
+    break if VALID_ANSWERS.include?(answer)
 
     prompt "This is not a valid choice. Please select 'y' or 'n'"
   end
@@ -222,7 +229,7 @@ end
 welcome
 loop do
   prompt 'Dealing cards...'
-  sleep(4)
+  sleep(2)
   grand_winner_score = { Dealer: 0, Player: 0 }
 
   loop do
@@ -235,12 +242,12 @@ loop do
     deal_initial_cards(current_cards, deck_current_game)
     display_cards(current_cards, :Dealer, true)
     display_cards(current_cards, :Player)
-    current_score = calculate_score(current_cards, current_score)
-    prompt "Your score is #{current_score[:Player]}"
+    current_score = calculate_score(current_cards)
+    display_score(:Player, current_score)
 
     # Player turn
     player_turn(deck_current_game, current_cards, current_score)
-    current_score = calculate_score(current_cards, current_score)
+    current_score = calculate_score(current_cards)
     if busted?(current_score, :Player)
       display_cards(current_cards, :Dealer, false)
       round_over(current_score, grand_winner_score)
@@ -252,7 +259,7 @@ loop do
 
     # Dealer turn
     dealer_turn(deck_current_game, current_cards, current_score)
-    current_score = calculate_score(current_cards, current_score)
+    current_score = calculate_score(current_cards)
     if busted?(current_score, :Dealer)
       display_cards(current_cards, :Dealer, false)
       round_over(current_score, grand_winner_score)
